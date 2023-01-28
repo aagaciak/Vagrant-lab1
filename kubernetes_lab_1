@@ -1,0 +1,46 @@
+Vagrant.configure("2") do |config|
+  servers=[
+    {
+      :hostname => "c1-cp1",
+      :box => "bento/ubuntu-18.04",
+      :ip => "172.16.94.10",
+      :ssh_port => '2210'
+    },
+    {
+      :hostname => "c1-node1",
+      :box => "bento/ubuntu-18.04",
+      :ip => "172.16.94.11",
+      :ssh_port => '2211'
+    },
+    {
+      :hostname => "c1-node2",
+      :box => "bento/ubuntu-18.04",
+      :ip => "172.16.94.12",
+      :ssh_port => '2212'
+    },
+    {
+      :hostname => "c1-bode3",
+      :box => "bento/ubuntu-18.04",
+      :ip => "172.16.94.13",
+      :ssh_port => '2213'
+    }
+
+  ]
+
+  servers.each do |machine|
+    config.vm.box_download_insecure=true
+    config.vm.define machine[:hostname] do |node|
+      node.vm.box = machine[:box]
+      node.vm.hostname = machine[:hostname]
+    
+      node.vm.network :private_network, ip: machine[:ip]
+      node.vm.network "forwarded_port", guest: 22, host: machine[:ssh_port], id: "ssh"
+
+      node.vm.provider :virtualbox do |v|
+        v.customize ["modifyvm", :id, "--memory", 512]
+        v.customize ["modifyvm", :id, "--name", machine[:hostname]]
+      end
+    end
+  end
+
+end
